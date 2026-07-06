@@ -107,7 +107,7 @@ export default function BrowsePage() {
           </div>
 
           <div className="lg:sticky lg:top-4 lg:h-[calc(100vh-6rem)]">
-            <MapPanel properties={properties} activeId={activeId} onSelect={selectFromMap} shouldPan={shouldPan} />
+            <MapPanel properties={properties} activeId={activeId} onSelect={selectFromMap} shouldPan={shouldPan} filterCity={filter.city} />
           </div>
         </div>
       ) : null}

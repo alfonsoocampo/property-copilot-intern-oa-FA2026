@@ -1,11 +1,12 @@
 "use client";
 
-import type { Property } from "@/lib/types";
+import type { City, Property } from "@/lib/types";
 import mapboxgl from "mapbox-gl";
 import { useEffect, useRef } from "react";
-
+import { CITY_CENTERS } from "@/lib/cityCenters";
 type MapPanelProps = {
   properties: Property[];
+  filterCity?: City | null;
   activeId?: string | null;
   shouldPan?: boolean;
   onSelect?: (id: string) => void;
@@ -117,7 +118,7 @@ function getPopupContent(property: Property) {
     </div>`
 }
 
-export function MapPanel({ properties, activeId, onSelect, shouldPan }: MapPanelProps) {
+export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity }: MapPanelProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
@@ -255,6 +256,7 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan }: MapPanel
     }
   }, [activeId]);
 
+  // Pan to the active property
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !activeId) return;
@@ -266,11 +268,22 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan }: MapPanel
     map.easeTo({
       center: [property.lng, property.lat],
       zoom: Math.max(map.getZoom(), 12),
-      duration: 800, // easeTo uses duration, not speed
+      duration: 800, 
     });
     }
   }, [activeId, properties, shouldPan]);
   
+  // Pan to the filter city
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !filterCity) return;
+    const center = CITY_CENTERS[filterCity];
+    map.easeTo({
+      center,
+      zoom: 12,
+      duration: 800,
+    });
+  }, [filterCity]);
   return (
     <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg border border-gray-200 bg-white">
       <div ref={mapContainerRef} className="absolute inset-0" />
