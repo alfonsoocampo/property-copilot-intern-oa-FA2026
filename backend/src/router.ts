@@ -39,7 +39,8 @@ export async function route(req: ApiRequest): Promise<ApiResponse> {
   // GET /properties
   //
   // BASELINE: scans the whole table, applies attribute filters server-side, and
-  // returns the result. There is no viewport/bounding-box support yet — add it
+  // returns the result. 
+  // There is no viewport/bounding-box support yet — add it
   // here (read `bbox` from the query, call your geospatial query) so the map
   // does not request every listing on the planet.
   if (req.path === "/properties") {

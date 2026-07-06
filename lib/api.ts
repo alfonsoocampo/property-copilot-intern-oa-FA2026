@@ -21,6 +21,9 @@ function toQueryString(filter: PropertyFilter): string {
   if (filter.maxRent !== undefined) params.set("maxRent", String(filter.maxRent));
   if (filter.bedrooms !== undefined) params.set("bedrooms", String(filter.bedrooms));
   if (filter.propertyType !== undefined) params.set("propertyType", filter.propertyType);
+  if (filter.minSquareFeet !== undefined) params.set("minSquareFeet", String(filter.minSquareFeet));
+  if (filter.maxSquareFeet !== undefined) params.set("maxSquareFeet", String(filter.maxSquareFeet));
+  if (filter.city !== undefined) params.set("city", filter.city);
   const query = params.toString();
   return query ? `?${query}` : "";
 }

@@ -3,8 +3,9 @@
 import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { fetchProperties } from "@/lib/api";
-import type { Property } from "@/lib/types";
+import type { Property, PropertyFilter } from "@/lib/types";
 import { PropertyCard } from "@/components/PropertyCard";
+import { FilterBar } from "@/components/FilterBar";
 
 const MapPanel = dynamic(
   () => import("@/components/MapPanel").then((mod) => mod.MapPanel),
@@ -26,6 +27,7 @@ export default function BrowsePage() {
   const [error, setError] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
   const [shouldPan, setShouldPan] = useState(false);
+  const [filter, setFilter] = useState<PropertyFilter>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -33,9 +35,7 @@ export default function BrowsePage() {
     async function load() {
       setState("loading");
       try {
-        // TODO (candidate): pass the active filters and map viewport here so the
-        // server returns only what is relevant, instead of every listing.
-        const data = await fetchProperties();
+        const data = await fetchProperties(filter);
         if (!cancelled) {
           setProperties(data);
           setState("ready");
@@ -52,7 +52,7 @@ export default function BrowsePage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [filter]);
 
   function selectFromMap(id: string) {
     setShouldPan(false);
@@ -77,11 +77,7 @@ export default function BrowsePage() {
         </p>
       </div>
 
-      {/*
-        TODO (candidate): a filter bar goes here (rent range, bedrooms, property
-        type, + one more dimension). Filters should update both the list and the
-        map, compose correctly, and be easy to reset.
-      */}
+      <FilterBar filter={filter} onChange={setFilter} />
 
       {state === "loading" ? (
         <p className="text-sm text-gray-600">Loading listings…</p>

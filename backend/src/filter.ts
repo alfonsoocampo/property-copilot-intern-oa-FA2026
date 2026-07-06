@@ -23,6 +23,15 @@ export function filterProperties(properties: Property[], filter: PropertyFilter)
     if (filter.propertyType !== undefined && property.propertyType !== filter.propertyType) {
       return false;
     }
+    if (filter.minSquareFeet !== undefined && property.squareFeet < filter.minSquareFeet) {
+      return false;
+    }
+    if (filter.maxSquareFeet !== undefined && property.squareFeet > filter.maxSquareFeet) {
+      return false;
+    }
+    if (filter.city !== undefined && property.city !== filter.city) {
+      return false;
+    }
     return true;
   });
 }
@@ -56,6 +65,24 @@ export function parseFilter(query: Record<string, string | undefined>): Property
     filter.propertyType = query.propertyType;
   }
 
-  
+  const minSquareFeet = Number(query.minSquareFeet);
+  if (query.minSquareFeet !== undefined && Number.isFinite(minSquareFeet)) {
+    filter.minSquareFeet = minSquareFeet;
+  }
+
+  const maxSquareFeet = Number(query.maxSquareFeet);
+  if (query.maxSquareFeet !== undefined && Number.isFinite(maxSquareFeet)) {
+    filter.maxSquareFeet = maxSquareFeet;
+  }
+
+  if (
+    query.city === "Vancouver" ||
+    query.city === "Richmond" ||
+    query.city === "Burnaby" ||
+    query.city === "Surrey"
+  ) {
+    filter.city = query.city;
+  }
+
   return filter;
 }

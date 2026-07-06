@@ -37,6 +37,21 @@ describe("filterProperties", () => {
   test("no filters returns everything", () => {
     expect(filterProperties(PROPERTIES, {})).toHaveLength(PROPERTIES.length);
   });
+
+  test("square footage range is inclusive on both ends", () => {
+    const result = filterProperties(PROPERTIES, { minSquareFeet: 900, maxSquareFeet: 1200 });
+    expect(result.length).toBeGreaterThan(0);
+    for (const p of result) {
+      expect(p.squareFeet).toBeGreaterThanOrEqual(900);
+      expect(p.squareFeet).toBeLessThanOrEqual(1200);
+    }
+  });
+
+  test("city matches exactly", () => {
+    const result = filterProperties(PROPERTIES, { city: "Vancouver" });
+    expect(result.length).toBeGreaterThan(0);
+    expect(result.every((p) => p.city === "Vancouver")).toBe(true);
+  });
 });
 
 describe("parseFilter", () => {
@@ -49,5 +64,15 @@ describe("parseFilter", () => {
   test("ignores invalid property type and absent fields", () => {
     expect(parseFilter({ propertyType: "castle" })).toEqual({});
     expect(parseFilter({})).toEqual({});
+  });
+
+  test("parses square footage and city query params", () => {
+    expect(
+      parseFilter({
+        minSquareFeet: "800",
+        maxSquareFeet: "1500",
+        city: "Burnaby",
+      })
+    ).toEqual({ minSquareFeet: 800, maxSquareFeet: 1500, city: "Burnaby" });
   });
 });

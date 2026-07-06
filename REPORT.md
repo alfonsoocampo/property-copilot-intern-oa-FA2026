@@ -27,5 +27,7 @@ flowchart TD
 
 ## What I'd add with more time
 Add pictures to the popup 
+Search function based on titles for filters
+
 
 Describe the highest-value improvements you would make next.

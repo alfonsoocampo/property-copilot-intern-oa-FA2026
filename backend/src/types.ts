@@ -42,4 +42,7 @@ export type PropertyFilter = {
   maxRent?: number;
   bedrooms?: number; // minimum number of bedrooms
   propertyType?: PropertyType;
+  minSquareFeet?: number;
+  maxSquareFeet?: number;
+  city?: City;
 };
