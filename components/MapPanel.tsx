@@ -7,6 +7,7 @@ import { useEffect, useRef } from "react";
 type MapPanelProps = {
   properties: Property[];
   activeId?: string | null;
+  shouldPan?: boolean;
   onSelect?: (id: string) => void;
 };
 
@@ -116,7 +117,7 @@ function getPopupContent(property: Property) {
     </div>`
 }
 
-export function MapPanel({ properties, activeId, onSelect }: MapPanelProps) {
+export function MapPanel({ properties, activeId, onSelect, shouldPan }: MapPanelProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
 
@@ -223,15 +224,53 @@ export function MapPanel({ properties, activeId, onSelect }: MapPanelProps) {
     };
   }, []);
 
+  // Active point style
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
-    const source = map.getSource("properties") as mapboxgl.GeoJSONSource | undefined;
-    if (!source) return;
-    source.setData(toFeatureCollection(properties));
-  }, [properties]);
+    if (!map || !map.getLayer("property-points")) return;
+    const applyActiveStyle = () => {
+      map.setPaintProperty("property-points", "circle-color", [
+        "case",
+        ["==", ["get", "id"], activeId ?? ""],
+        "#ef4444",  // red — active
+        "#2563eb",  // blue — default
+      ]);
+      map.setPaintProperty("property-points", "circle-radius", [
+        "case",
+        ["==", ["get", "id"], activeId ?? ""],
+        12,  // bigger when active
+        8,
+      ]);
+      map.setPaintProperty("property-points", "circle-stroke-width", [
+        "case",
+        ["==", ["get", "id"], activeId ?? ""],
+        3,
+        2,
+      ]);
+    };
+    if (map.isStyleLoaded()) {
+      applyActiveStyle();
+    } else {
+      map.once("load", applyActiveStyle);
+    }
+  }, [activeId]);
 
-
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !activeId) return;
+  
+    const property = properties.find((p) => p.id === activeId);
+    if (!property) return;
+  
+    if (shouldPan) {
+    map.easeTo({
+      center: [property.lng, property.lat],
+      zoom: Math.max(map.getZoom(), 12),
+      duration: 800, // easeTo uses duration, not speed
+    });
+    }
+  }, [activeId, properties, shouldPan]);
+  
   return (
     <div className="relative h-full min-h-[300px] w-full overflow-hidden rounded-lg border border-gray-200 bg-white">
       <div ref={mapContainerRef} className="absolute inset-0" />

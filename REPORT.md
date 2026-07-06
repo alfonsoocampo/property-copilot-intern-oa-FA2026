@@ -5,6 +5,17 @@ Address each of the four ambiguous areas (one to three sentences each):
 1. **Map provider** — which provider you chose and the trade-off versus the alternatives.
 The map provider I chose is Mapbox over Leaflet and Google because it offers built-in clustering for points, scaleable for real-world application and utilizes WebGL rendering rather than DOM rendering in Leaflet. Additionally, I found Mapbox's map UI more appealing than Leaflet/OpenStreetMaps UI since Mapbox's baselayer includes point-of-interests and streets which are important when factoring a place to rent. These factors can improve user experience and help renters determine what's around the location they're wanting to move to.  
 
+```mermaid
+flowchart TD
+  A[properties array] --> B[toFeatureCollection]
+  B --> C[GeoJSON source "properties"]
+  C --> D[property-clusters circle layer]
+  C --> E[property-cluster-count symbol layer]
+  C --> F[property-points circle layer]
+  F --> G[mapboxgl.Popup]
+  G --> H[Hover HTML popup - DOM only]
+```
+
 2. **Performance at density** — how you keep the map smooth with all markers visible (clustering, viewport rendering, etc.) and what you observed.
 
 - WebGL map layering

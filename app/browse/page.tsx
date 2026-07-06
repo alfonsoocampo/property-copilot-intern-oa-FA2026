@@ -25,6 +25,7 @@ export default function BrowsePage() {
   const [state, setState] = useState<LoadState>("loading");
   const [error, setError] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [shouldPan, setShouldPan] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,11 +55,17 @@ export default function BrowsePage() {
   }, []);
 
   function selectFromMap(id: string) {
+    setShouldPan(false);
     setActiveId(id);
     document.getElementById(`property-card-${id}`)?.scrollIntoView({
       behavior: "smooth",
       block: "center",   // or "nearest" for minimal scroll
     });
+  }
+
+  function selectFromCard(id: string) {
+    setShouldPan(true);
+    setActiveId(id);
   }
 
   return (
@@ -96,7 +103,7 @@ export default function BrowsePage() {
                     key={property.id}
                     property={property}
                     active={property.id === activeId}
-                    onSelect={setActiveId}
+                    onSelect={selectFromCard}
                   />
                 ))}
               </div>
@@ -104,7 +111,7 @@ export default function BrowsePage() {
           </div>
 
           <div className="lg:sticky lg:top-4 lg:h-[calc(100vh-6rem)]">
-            <MapPanel properties={properties} activeId={activeId} onSelect={selectFromMap} />
+            <MapPanel properties={properties} activeId={activeId} onSelect={selectFromMap} shouldPan={shouldPan} />
           </div>
         </div>
       ) : null}
