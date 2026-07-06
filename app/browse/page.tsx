@@ -1,10 +1,22 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { fetchProperties } from "@/lib/api";
 import type { Property } from "@/lib/types";
 import { PropertyCard } from "@/components/PropertyCard";
-import { MapPanel } from "@/components/MapPanel";
+
+const MapPanel = dynamic(
+  () => import("@/components/MapPanel").then((mod) => mod.MapPanel),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full min-h-[300px] w-full items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-sm text-gray-500">
+        Loading map…
+      </div>
+    ),
+  }
+);
 
 type LoadState = "loading" | "error" | "ready";
 
@@ -40,6 +52,14 @@ export default function BrowsePage() {
       cancelled = true;
     };
   }, []);
+
+  function selectFromMap(id: string) {
+    setActiveId(id);
+    document.getElementById(`property-card-${id}`)?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",   // or "nearest" for minimal scroll
+    });
+  }
 
   return (
     <section className="space-y-4">
@@ -84,7 +104,7 @@ export default function BrowsePage() {
           </div>
 
           <div className="lg:sticky lg:top-4 lg:h-[calc(100vh-6rem)]">
-            <MapPanel properties={properties} activeId={activeId} onSelect={setActiveId} />
+            <MapPanel properties={properties} activeId={activeId} onSelect={selectFromMap} />
           </div>
         </div>
       ) : null}

@@ -21,9 +21,12 @@ type PropertyCardProps = {
  * define. Reuse this (and add more small components like badges/buttons) across
  * the list and any detail view rather than duplicating markup.
  */
+
 export function PropertyCard({ property, active, onSelect }: PropertyCardProps) {
+  
   return (
-    <article
+    <article 
+      id={`property-card-${property.id}`}
       className={`overflow-hidden rounded-lg border bg-white transition ${
         active ? "border-black ring-1 ring-black" : "border-gray-200"
       } ${onSelect ? "cursor-pointer hover:border-gray-400" : ""}`}

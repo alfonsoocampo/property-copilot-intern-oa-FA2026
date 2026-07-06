@@ -39,6 +39,7 @@ export function parseFilter(query: Record<string, string | undefined>): Property
   const maxRent = Number(query.maxRent);
   if (query.maxRent !== undefined && Number.isFinite(maxRent)) {
     filter.maxRent = maxRent;
+    
   }
 
   const bedrooms = Number(query.bedrooms);
@@ -55,5 +56,6 @@ export function parseFilter(query: Record<string, string | undefined>): Property
     filter.propertyType = query.propertyType;
   }
 
+  
   return filter;
 }
