@@ -1,5 +1,6 @@
 import { filterProperties, parseFilter } from "./filter";
-import { getPropertyById, listAllProperties } from "./properties";
+import { getPropertyById, listAllProperties, queryByBoundingBox } from "./properties";
+import { parseBoundingBox } from "./geo";
 
 export type ApiRequest = {
   method: string;
@@ -36,14 +37,20 @@ export async function route(req: ApiRequest): Promise<ApiResponse> {
     return { statusCode: 200, body: { property } };
   }
 
+
   // GET /properties
-  //
-  // BASELINE: scans the whole table, applies attribute filters server-side, and
-  // returns the result. 
-  // There is no viewport/bounding-box support yet — add it
-  // here (read `bbox` from the query, call your geospatial query) so the map
-  // does not request every listing on the planet.
   if (req.path === "/properties") {
+    if(req.query.bbox && req.query.bbox != "") {
+      const box = parseBoundingBox(req.query.bbox);
+      if(!box) {
+        return { statusCode: 400, body: { error: "Invalid bounding box" } };
+      }
+
+      const properties = await queryByBoundingBox(box);
+      const filteredProperties = filterProperties(properties, parseFilter(req.query));
+      return { statusCode: 200, body: { properties: filteredProperties, count: filteredProperties.length } };
+    } 
+    
     const all = await listAllProperties();
     const properties = filterProperties(all, parseFilter(req.query));
     return { statusCode: 200, body: { properties, count: properties.length } };

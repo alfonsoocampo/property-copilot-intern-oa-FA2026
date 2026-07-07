@@ -1,6 +1,6 @@
-import { GetCommand, PutCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, PutCommand, QueryCommand, ScanCommand } from "@aws-sdk/lib-dynamodb";
 import { GEO_INDEX, TABLE_NAME, getDocClient } from "./db";
-import { encodeGeohash, geohashPrefix, type BoundingBox } from "./geo";
+import { boundingBoxPrefixes, isInBoundingBox, encodeGeohash, geohashPrefix, type BoundingBox } from "./geo";
 import type { Property } from "./types";
 
 /** Compute the geo index attributes for an item from its coordinates. */
@@ -64,6 +64,20 @@ export async function listAllProperties(): Promise<Property[]> {
  * This avoids scanning the whole table and is what the map viewport should call.
  */
 export async function queryByBoundingBox(_box: BoundingBox): Promise<Property[]> {
-  void GEO_INDEX; // available for your Query: IndexName: GEO_INDEX
-  throw new Error("queryByBoundingBox is not implemented yet — see Backend & Data Design.");
+  const prefixes = boundingBoxPrefixes(_box); 
+  const properties: Property[] = [];
+  for (const prefix of prefixes) {
+    const result = await getDocClient().send(
+      new QueryCommand({
+        TableName: TABLE_NAME,
+        IndexName: GEO_INDEX,
+        KeyConditionExpression: "geohashPrefix = :prefix",
+        ExpressionAttributeValues: { ":prefix": prefix },
+      })
+    );
+    const items = (result.Items as Property[] | undefined) ?? [];
+    const filteredItems = items.filter((item) => isInBoundingBox(item.lat, item.lng, _box));
+    properties.push(...filteredItems);
+  }
+  return properties;
 }

@@ -23,6 +23,7 @@ flowchart TD
 
 3. **Geospatial querying** — how the server answers a viewport query without scanning the table, and how you use the geohash index.
 
+
 4. **Filtering model** — the dimensions you support, how filters compose, and the empty/reset behaviour.
 
 ## What I'd add with more time

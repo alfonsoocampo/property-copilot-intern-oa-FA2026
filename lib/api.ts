@@ -15,8 +15,9 @@ async function apiGet<T>(path: string): Promise<T> {
   return body as T;
 }
 
-function toQueryString(filter: PropertyFilter): string {
+function toQueryString(filter: PropertyFilter, bbox?: string): string {
   const params = new URLSearchParams();
+  if (bbox) params.set("bbox", bbox);
   if (filter.minRent !== undefined) params.set("minRent", String(filter.minRent));
   if (filter.maxRent !== undefined) params.set("maxRent", String(filter.maxRent));
   if (filter.bedrooms !== undefined) params.set("bedrooms", String(filter.bedrooms));
@@ -28,8 +29,8 @@ function toQueryString(filter: PropertyFilter): string {
   return query ? `?${query}` : "";
 }
 
-export async function fetchProperties(filter: PropertyFilter = {}): Promise<Property[]> {
-  const data = await apiGet<{ properties: Property[] }>(`/properties${toQueryString(filter)}`);
+export async function fetchProperties(filter: PropertyFilter = {}, bbox?: string): Promise<Property[]> {
+  const data = await apiGet<{ properties: Property[] }>(`/properties${toQueryString(filter, bbox)}`);
   return data.properties;
 }
 

@@ -10,7 +10,10 @@ type MapPanelProps = {
   activeId?: string | null;
   shouldPan?: boolean;
   onSelect?: (id: string) => void;
+  bboxOnChange?: (bbox: [number, number, number, number]) => void;
+  onPanComplete?: () => void;
 };
+
 
 /**
  * PLACEHOLDER — this is where the map goes, and it is the core of the OA.
@@ -118,9 +121,13 @@ function getPopupContent(property: Property) {
     </div>`
 }
 
-export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity }: MapPanelProps) {
+export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity, bboxOnChange, onPanComplete }: MapPanelProps) {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<mapboxgl.Map | null>(null);
+  const propertiesRef = useRef(properties);
+  propertiesRef.current = properties;
+  const bboxOnChangeRef = useRef(bboxOnChange);
+  bboxOnChangeRef.current = bboxOnChange;
 
   useEffect(() => {
     const token = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
@@ -150,8 +157,24 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity
         clusterMaxZoom: 50,
         clusterRadius: 24,
       });
-
+    
       initLayers(map);
+    });
+
+    let skipNextMoveEnd = true;
+    map.on("moveend", () => {
+      const bounds = map.getBounds();
+      if (!bounds || !bboxOnChangeRef.current) return;
+      if (skipNextMoveEnd) {
+        skipNextMoveEnd = false;
+        return;
+      }
+      bboxOnChangeRef.current([
+        bounds.getWest(),
+        bounds.getSouth(),
+        bounds.getEast(),
+        bounds.getNorth(),
+      ]);
     });
 
     // Mouse Handlers
@@ -213,7 +236,6 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity
       target: { layerId: 'property-points' },
       handler: (e) => {
           map.getCanvas().style.cursor = '';
-          const id = e.feature?.properties.id as string;      
           popup.remove();
       }
     });
@@ -224,6 +246,14 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity
       mapRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    const source = map?.getSource("properties") as mapboxgl.GeoJSONSource | undefined;
+    if (source) {
+      source.setData(toFeatureCollection(properties));
+    }
+  }, [properties]);
 
   // Active point style
   useEffect(() => {
@@ -256,22 +286,21 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity
     }
   }, [activeId]);
 
-  // Pan to the active property
+  // Pan to the active property only when the user selects from the list.
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !activeId) return;
-  
-    const property = properties.find((p) => p.id === activeId);
+    if (!map || !activeId || !shouldPan) return;
+
+    const property = propertiesRef.current.find((p) => p.id === activeId);
     if (!property) return;
-  
-    if (shouldPan) {
+
     map.easeTo({
       center: [property.lng, property.lat],
-      zoom: Math.max(map.getZoom(), 12),
-      duration: 800, 
+      zoom: Math.max(map.getZoom(), 12.5),
+      duration: 800,
     });
-    }
-  }, [activeId, properties, shouldPan]);
+    onPanComplete?.();
+  }, [activeId, shouldPan, onPanComplete]);
   
   // Pan to the filter city
   useEffect(() => {

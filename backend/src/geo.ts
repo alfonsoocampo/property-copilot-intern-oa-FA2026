@@ -30,6 +30,19 @@ export function geohashPrefix(geohash: string): string {
   return geohash.slice(0, GEOHASH_PREFIX_LENGTH);
 }
 
+/** Parse a comma-separated bbox query param into a BoundingBox.
+ *  Expected wire format (from Mapbox getBounds): west,south,east,north
+ *  i.e. minLng,minLat,maxLng,maxLat
+ */
+export function parseBoundingBox(bbox: string): BoundingBox | null {
+  if(!bbox || bbox == "") return null;
+  const bboxArray = bbox.split(",").map(Number);
+  if (bboxArray.length !== 4 || bboxArray.some((n) => !Number.isFinite(n))) return null;
+  const [minLng, minLat, maxLng, maxLat] = bboxArray;
+  if (minLng > maxLng || minLat > maxLat) return null;
+  return { minLng, minLat, maxLng, maxLat }; 
+}
+
 /**
  * The set of `geohashPrefix` partitions that cover a bounding box. A
  * bounding-box query should Query the geo GSI once per returned prefix, then
