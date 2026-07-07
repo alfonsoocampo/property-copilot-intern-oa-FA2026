@@ -29,6 +29,10 @@ type MapPanelProps = {
  * The props you need are already threaded through from the browse page.
  */
 
+function formatRentLabel(rent: number): string {
+  return `$${rent.toLocaleString("en-CA")}`;
+}
+
 // Helper function to convert the properties to a GeoJSON feature collection
 function toFeatureCollection(properties: Property[]): GeoJSON.FeatureCollection {
   return {
@@ -43,6 +47,7 @@ function toFeatureCollection(properties: Property[]): GeoJSON.FeatureCollection 
         id: p.id,
         title: p.title,
         rent: p.rent,
+        rentLabel: formatRentLabel(p.rent),
       },
     })),
   };
@@ -93,6 +98,27 @@ function initLayers(map: mapboxgl.Map) {
       "circle-color": "#2563eb",
       "circle-stroke-width": 2,
       "circle-stroke-color": "#fff",
+    },
+  });
+
+  map.addLayer({
+    id: "property-point-labels",
+    type: "symbol",
+    source: "properties",
+    filter: ["!", ["has", "point_count"]],
+    layout: {
+      "text-field": ["get", "rentLabel"],
+      "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+      "text-size": 11,
+      "text-offset": [0, -0.9],
+      "text-anchor": "bottom",
+      "text-allow-overlap": false,
+      "text-ignore-placement": true,
+    },
+    paint: {
+      "text-color": "#1e3a5f",
+      "text-halo-color": "#ffffff",
+      "text-halo-width": 1.5,
     },
   });
 }
@@ -149,7 +175,7 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity
   
     // Load the map and add the layers
     map.on("load", () => {
-      const featureCollection = toFeatureCollection(properties);
+      const featureCollection = toFeatureCollection(propertiesRef.current);
       map.addSource("properties", {
         type: "geojson",
         data: featureCollection,
@@ -225,7 +251,7 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity
       handler: (e) => {
         map.getCanvas().style.cursor = 'pointer';
         // Copy the coordinates from the POI underneath the cursor
-        const property = properties.find((p) => p.id === e.feature?.properties.id);
+        const property = propertiesRef.current.find((p) => p.id === e.feature?.properties.id);
         if (!property) return;
         showPopup(property);
     }
@@ -289,6 +315,7 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity
   // Pan to the active property only when the user selects from the list.
   useEffect(() => {
     const map = mapRef.current;
+    propertiesRef.current = properties;
     if (!map || !activeId || !shouldPan) return;
 
     const property = propertiesRef.current.find((p) => p.id === activeId);

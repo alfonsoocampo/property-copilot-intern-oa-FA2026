@@ -92,7 +92,7 @@ export default function BrowsePage() {
 
   function handleBboxChange(next: [number, number, number, number]) {
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => setBbox(next), 300);
+    debounceRef.current = setTimeout(() => setBbox(next), 500);
   }
 
   const handlePanComplete = useCallback(() => setShouldPan(false), []);

@@ -57,8 +57,8 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
   const hasActiveFilters = Object.values(filter).some((v) => v !== undefined);
 
   return (
-    <div className="w-full rounded-[50px] bg-gray-100 p-4 shadow-md">
-      <div className="flex flex-wrap items-end justify-center gap-3">
+    <div className="w-full flex flex-col rounded-[10px] bg-gray-100 p-4 shadow-md gap-4">
+      <div className="flex items-end justify-center gap-3">
         <div className="flex min-w-[7rem] flex-col gap-1">
           <label htmlFor="min-rent" className={labelClassName}>
             Min rent
@@ -126,7 +126,9 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
           </select>
         </div>
 
-        <div className="flex min-w-[7rem] flex-col gap-1">
+      </div>
+      <div className="flex flex-row justify-center gap-3">
+      <div className="flex min-w-[7rem] flex-col gap-1">
           <label htmlFor="min-sqft" className={labelClassName}>
             Min sq ft
           </label>
@@ -157,7 +159,6 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
             onChange={(e) => updateNumberField("maxSquareFeet", e.target.value)}
           />
         </div>
-
         <div className="flex min-w-[9rem] flex-col gap-1">
           <label htmlFor="city" className={labelClassName}>
             City
@@ -176,17 +177,16 @@ export function FilterBar({ filter, onChange }: FilterBarProps) {
             ))}
           </select>
         </div>
-
-        {hasActiveFilters ? (
-          <button
+      </div>
+      {hasActiveFilters ? (
+          <button 
             type="button"
             onClick={resetFilters}
             className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50"
           >
-            Reset
+            Reset Filters
           </button>
         ) : null}
-      </div>
     </div>
   );
 }
