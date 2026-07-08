@@ -260,7 +260,7 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity
     map.addInteraction('places-mouseleave-interaction', {
       type: 'mouseleave',
       target: { layerId: 'property-points' },
-      handler: (e) => {
+      handler: () => {
           map.getCanvas().style.cursor = '';
           popup.remove();
       }

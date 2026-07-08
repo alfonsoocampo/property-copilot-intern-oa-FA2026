@@ -1,6 +1,5 @@
 import { describe, expect, test } from "vitest";
 import {
-  GEOHASH_PRECISION,
   GEOHASH_PREFIX_LENGTH,
   boundingBoxPrefixes,
   encodeGeohash,
