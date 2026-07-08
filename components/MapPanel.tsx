@@ -160,6 +160,17 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity
     if (!token || !mapContainerRef.current) return;
     mapboxgl.accessToken = token;
 
+    function reportBounds(map: mapboxgl.Map) {
+      const bounds = map.getBounds();
+      if (!bounds || !bboxOnChangeRef.current) return;
+      bboxOnChangeRef.current([
+        bounds.getWest(),
+        bounds.getSouth(),
+        bounds.getEast(),
+        bounds.getNorth(),
+      ]);
+    }
+
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
       style: "mapbox://styles/mapbox/streets-v12",
@@ -185,22 +196,11 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity
       });
     
       initLayers(map);
+      reportBounds(map);
     });
 
-    let skipNextMoveEnd = true;
     map.on("moveend", () => {
-      const bounds = map.getBounds();
-      if (!bounds || !bboxOnChangeRef.current) return;
-      if (skipNextMoveEnd) {
-        skipNextMoveEnd = false;
-        return;
-      }
-      bboxOnChangeRef.current([
-        bounds.getWest(),
-        bounds.getSouth(),
-        bounds.getEast(),
-        bounds.getNorth(),
-      ]);
+      reportBounds(map);
     });
 
     // Mouse Handlers
@@ -315,7 +315,6 @@ export function MapPanel({ properties, activeId, onSelect, shouldPan, filterCity
   // Pan to the active property only when the user selects from the list.
   useEffect(() => {
     const map = mapRef.current;
-    propertiesRef.current = properties;
     if (!map || !activeId || !shouldPan) return;
 
     const property = propertiesRef.current.find((p) => p.id === activeId);
