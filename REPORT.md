@@ -8,7 +8,7 @@ The map provider I chose is Mapbox over Leaflet and Google because it offers bui
 ```mermaid
 flowchart TD
   A[properties array] --> B[toFeatureCollection]
-  B --> C[GeoJSON source "properties"]
+  B --> C[GeoJSON source: properties]
   C --> D[property-clusters circle layer]
   C --> E[property-cluster-count symbol layer]
   C --> F[property-points circle layer]
